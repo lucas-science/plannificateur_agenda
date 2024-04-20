@@ -71,6 +71,7 @@ class Controller:
     
 c = Controller("https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18")
 
+"""
 print(c.local_storage.data)
 
 
@@ -82,3 +83,5 @@ c.post_list_objectifs([
 print(c.get_plannification_automatique())
 
 c.local_storage.save_data()
+
+"""
