@@ -9,7 +9,10 @@ class LocalStorage:
     def _init_data(self, nom_fichier):
         if not os.path.exists(nom_fichier):
             init_data = {
-                "streak":0
+                "score":0,
+                "objectifs_utilisateur":[],
+                "objectifs_plannifiés":[],
+                "taches_fini" : []
             }
             return init_data
         else:
@@ -24,7 +27,7 @@ class LocalStorage:
     
     def save_data(self):
         with open(self.nom_fichier, 'w') as fichier_json:
-            print("d")
+            print("Data saved")
             json.dump(self.data, fichier_json)
 
     def get_state(self,state):
@@ -39,7 +42,13 @@ class LocalStorage:
             return True
         else:
             return False
-        
+    
+    def state_append(self, state, value):
+        if self._is_state_init(state):
+            self.data[state].append(value)
+            return True
+        else:
+            return False
 
 
 
