@@ -49,13 +49,13 @@ Et on obtient donc par exemple avec des journée de travaille bornée entre 8h e
 ```json
 {'2024-04-20': [
     {'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00'},
-    {'summary': 'IE meca', 'start_time': '8:00', 'end_time': '12:00'},
+    {'summary': 'IE meca', 'start_time': '08:00', 'end_time': '12:00'},
     {'summary': 'IE meca', 'start_time': '14:00', 'end_time': '16:00'},
     {'summary': 'IE math', 'start_time': '16:00', 'end_time': '21:00'}
 ],
 '2024-04-21': [
     {'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00'},
-    {'summary': 'IE math', 'start_time': '8:00', 'end_time': '09:00'}
+    {'summary': 'IE math', 'start_time': '08:00', 'end_time': '09:00'}
 ],
 '2024-04-22': [
     {'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00'}
