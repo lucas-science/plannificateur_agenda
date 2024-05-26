@@ -1,5 +1,23 @@
 ﻿# plannificateur_agenda
 
+### Overview du projet
+
+Lorsqu'on lance l'application
+<img src="./img/image.png" alt="description de l'image" width="80%" style=''>
+
+Ensuite lorsqu'on donne un lien d'emplois du temps (ex : "https://ade-outils.insa-lyon.fr/ADE-Cal:~[YOUR INSA ID]!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18") on obtient cette page :
+<img src="./img/image2.png" alt="description de l'image" width="80%" style=''>
+
+Dans l'onglet "Défintions Objectifs" : 
+<img src="./img/image3.png" alt="description de l'image" width="80%" style=''>
+Avec cette interface on peut ajouter de nouveaux objectifs. De plus on peut avoir la liste de ces derniers, ainsi que la possibilité des les suprimer.
+
+Enfin on à le dernier onglet, représentant l'historique et le score de l'utilisateur
+* Historique :
+<img src="./img/image4.png" alt="description de l'image" width="70%" style=''>
+* Score :
+<img src="./img/image5.png" alt="description de l'image" width="70%" style=''>
+
 
 ### Récupération les évenements des x:int prochains jours 
 x=0 représente aujourd'hui, x=1 représente demain, ..., x=i représente le xème jour inclus.
@@ -32,9 +50,10 @@ les liste vides représentent les jours sans cours (weekend, jour ferié..)
 
 ```python
 
-c = Controller("https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18")
+agenda_URL = "https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18"
 
-print(c.local_storage.data)
+c = Controller()
+c.init_agenda_data(agenda_URL)
 
 c.post_list_objectifs([
     {"name":"IE meca", "deadline":"23/04/2024", "temps":6},
