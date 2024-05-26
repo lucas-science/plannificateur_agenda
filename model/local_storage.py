@@ -9,6 +9,7 @@ class LocalStorage:
     def _init_data(self, nom_fichier):
         if not os.path.exists(nom_fichier):
             init_data = {
+                'url':"",
                 "score":0,
                 "objectifs_utilisateur":[],
                 "objectifs_plannifiés":[],

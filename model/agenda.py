@@ -7,9 +7,10 @@ from datetime import datetime, timedelta
 
 class Agenda_data:
     def __init__(self, url) -> None:
+        self.url = url 
         self.ics_content = self._get_ics_content(url)
         self.cal = Calendar.from_ical(self.ics_content)
-    
+
     def _get_ics_content(self,url):
         response = requests.get(url)
         if response.status_code == 200:
@@ -32,7 +33,7 @@ class Agenda_data:
             start_time = ev.get('DTSTART').dt.strftime('%H:%M')
             end_time = ev.get('DTEND').dt.strftime('%H:%M')
 
-            event = {"summary":summary, "start_time":start_time, "end_time":end_time}
+            event = {"summary":summary, "start_time":start_time, "end_time":end_time, "completed":False}
             events_final_for_date.append(event)
 
         return events_final_for_date
@@ -77,7 +78,7 @@ class Agenda_data:
 
 
     def _get_creneaux_libre_by_day(self, events, delta_minute):
-        events.append({'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00'})
+        events.append({'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00','completed':False})
         events_triees = sorted(events, key=self._comparer_temps_debut, reverse=False)
         begin = '8:00'
         end = '21:00'
@@ -173,12 +174,12 @@ class Agenda_data:
                     if temps_creneau > 0:  # Ajoutez cette condition pour éviter les créneaux avec une durée nulle
                         if temps_creneau >= temps_event:
                             heure_fin = self._calculer_heure_fin(heure_debut_creneau, temps_event)
-                            list_cours[date].append({'summary': event_name, 'start_time': heure_debut_creneau, 'end_time': heure_fin})
+                            list_cours[date].append({'summary': event_name, 'start_time': heure_debut_creneau, 'end_time': heure_fin, 'completed': False})
                             creneaux[creneau_index]['start'] = heure_fin
                             creneaux[creneau_index]['time'] -= temps_event
                             temps_event = 0
                         else:
-                            list_cours[date].append({'summary': event_name, 'start_time': heure_debut_creneau, 'end_time': heure_fin_creneau})
+                            list_cours[date].append({'summary': event_name, 'start_time': heure_debut_creneau, 'end_time': heure_fin_creneau, 'completed': False})
                             temps_event -= temps_creneau
                             creneaux[creneau_index]['start'] = heure_fin_creneau
                             creneaux[creneau_index]['time'] = 0
@@ -216,6 +217,8 @@ class Agenda_data:
         pass
 
 # Lien vers le fichier ICS
+
+"""
 ics_url = "https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18"
 
 agenda = Agenda_data(ics_url)
@@ -228,3 +231,4 @@ liste_objectifs = [
 ]
 new_agenda = agenda.get_creneaux_supllémentaire(liste_objectifs, cours)
 
+"""

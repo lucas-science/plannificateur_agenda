@@ -11,10 +11,13 @@ from model.agenda import Agenda_data
 
 
 class Controller:
-    def __init__(self, agenda_URL) -> None:
+    def __init__(self) -> None:
         self.local_storage = LocalStorage("test.json")
+        self.agenda_data = None
+
+    def init_agenda_data(self,agenda_URL):
         self.agenda_data = Agenda_data(agenda_URL)
-    
+        
     def _delate_tache_from_liste_evenemnts(self, tache, nom_liste_evenements):
         liste_evenements = self.local_storage.get_state(nom_liste_evenements)
         if tache not in liste_evenements:
@@ -23,10 +26,15 @@ class Controller:
         return  liste_evenements
 
     def increase_streak(self):
-        state = "streak"
+        state = "score"
         val = self.local_storage.get_state(state)
         self.local_storage.change_state(state, val + 1)
     
+    def decrease_streak(self):
+        state = "score"
+        val = self.local_storage.get_state(state)
+        self.local_storage.change_state(state, val - 1)
+
     def getScore(self):
         score = self.local_storage.get_state("score")
         return score
@@ -36,41 +44,59 @@ class Controller:
         evenements_INSA = self.agenda_data.get_events_for_next_x_day(6)
         # on regarde si il y a des evenements plannifier par l'algo
         return evenements_INSA
-    
-    def post_list_objectifs(self, new_objectifs:list):
-        # on ajoute à la base de donnée la liste d'objectifs
-        anciens_objectifs = self.local_storage.get_state("objectifs_utilisateur")
-        # on ne met pas des doublons d'objectifs
-        for objectif in anciens_objectifs:
-            if objectif not in new_objectifs:
-                new_objectifs.append(objectif)
 
-        # on ajoute dans la base de donnée l'ensemble des objectifs
-        res = self.local_storage.change_state("objectifs_utilisateur", new_objectifs)
+    def post_list_objectifs(self, new_objectifs: list):
+        # On récupère les anciens objectifs
+        anciens_objectifs = self.local_storage.get_state("objectifs_utilisateur")
+
+        # On vérifie s'il y a des nouveaux objectifs qui ne sont pas déjà présents dans les anciens objectifs
+        for objectif in new_objectifs:
+            if objectif not in anciens_objectifs:
+                anciens_objectifs.append(objectif)
+
+        # On met à jour la base de données avec les objectifs sans doublons
+        res = self.local_storage.change_state("objectifs_utilisateur", anciens_objectifs)
         return res
 
+
     def post_tache_fini(self, tache, date:datetime):
-        new_objectifs_utilisateur = self._delate_tache_from_liste_evenemnts(tache, "objectifs_utilisateur")
-        new_objectifs_planifies = self._delate_tache_from_liste_evenemnts(tache, "objectifs_plannifiés")
-        # on update la base de données
-        if new_objectifs_planifies:
-            self.local_storage.change_state("objectifs_plannifiés", new_objectifs_planifies)
-        if new_objectifs_utilisateur:
-            self.local_storage.change_state("objectifs_utilisateur", new_objectifs_utilisateur)
+        # On récupère la liste des tâches terminées depuis le stockage local
+        taches_fini = self.local_storage.get_state("taches_fini")
 
-        # on ajoute dans les taches finis
-        self.local_storage.state_append("taches_fini", [tache, date.strftime("%d/%m/%Y")])
+        # On vérifie si la tâche n'est pas déjà dans la liste des tâches terminées
+        tache_existante = [t for t in taches_fini if t[0] == tache and t[1] == date.strftime("%d/%m/%Y")]
+        if not tache_existante:
+            # Si la tâche n'existe pas, on l'ajoute à la liste des tâches terminées
+            taches_fini.append([tache, date.strftime("%d/%m/%Y")])
 
+            # On met à jour la base de données avec la nouvelle liste des tâches terminées
+            self.local_storage.change_state("taches_fini", taches_fini)
+        else:
+            print("La tâche existe déjà dans la liste des tâches terminées.")
+
+    def delete_finished_task(self, task, date: datetime):
+        # On récupère la liste des tâches terminées depuis le stockage local
+        finished_tasks = self.local_storage.get_state("taches_fini")
+        task['completed'] = True
+
+        for finished_task in finished_tasks:
+            print(finished_task)
+            if [task, date.strftime("%d/%m/%Y")] == finished_task:
+                self.local_storage.data["taches_fini"].remove(finished_task)
+                print('removed')
+    
     def get_plannification_automatique(self):
         objectifs = self.local_storage.get_state("objectifs_utilisateur")
         cours = self.agenda_data.get_events_for_next_x_day(6)
         if objectifs == []:
-            return False
+            return (0, cours)
         else:
-            return self.agenda_data.get_creneaux_supllémentaire(objectifs,cours)
+            res = self.agenda_data.get_creneaux_supllémentaire(objectifs,cours)
+            if res == -1:
+                return (-1, cours) 
+            else:
+                return (1, cours)
     
-c = Controller("https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18")
-
 """
 print(c.local_storage.data)
 
