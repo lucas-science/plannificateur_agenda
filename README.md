@@ -1,4 +1,4 @@
-﻿# plannificateur_agenda
+﻿# Plannificateur d'Agenda
 
 ### Overview du projet
 
