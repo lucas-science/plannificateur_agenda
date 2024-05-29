@@ -3,15 +3,21 @@ import calendar
 from icalendar import Calendar
 from datetime import datetime, timedelta
 
-
-
 class Agenda_data:
     def __init__(self, url) -> None:
         self.url = url 
         self.ics_content = self._get_ics_content(url)
         self.cal = Calendar.from_ical(self.ics_content)
 
-    def _get_ics_content(self,url):
+    def _get_ics_content(self, url):
+        """
+        Récupère le contenu ICS depuis l'URL et le retourne sous forme de texte.
+        Args:
+            url (str): L'URL du fichier ICS.
+
+        Returns:
+            str: Le contenu du fichier ICS sous forme de texte.
+        """
         response = requests.get(url)
         if response.status_code == 200:
             return response.text
@@ -19,7 +25,15 @@ class Agenda_data:
             print("Erreur lors de la récupération du fichier ICS.")
             return None
 
-    def _get_events_for_date_searched(self,date_searched):
+    def _get_events_for_date_searched(self, date_searched):
+        """
+        Récupère les événements pour une date donnée.
+        Args:
+            date_searched (datetime.date): La date pour laquelle rechercher les événements.
+
+        Returns:
+            list: Une liste de dictionnaires contenant les détails des événements pour la date donnée.
+        """
         events_for_date = []
         events_final_for_date = []
         calendar = self.cal
@@ -33,12 +47,21 @@ class Agenda_data:
             start_time = ev.get('DTSTART').dt.strftime('%H:%M')
             end_time = ev.get('DTEND').dt.strftime('%H:%M')
 
-            event = {"summary":summary, "start_time":start_time, "end_time":end_time, "completed":False}
+            event = {"summary": summary, "start_time": start_time, "end_time": end_time, "completed": False}
             events_final_for_date.append(event)
 
         return events_final_for_date
     
     def _difference(self, heure1, heure2):
+        """
+        Calcule la différence en minutes entre deux heures.
+        Args:
+            heure1 (str): La première heure au format 'HH:MM'.
+            heure2 (str): La deuxième heure au format 'HH:MM'.
+
+        Returns:
+            int: La différence en minutes entre les deux heures, ou -1 si la première heure est plus grande.
+        """
         heure1_heures, heure1_minutes = map(int, heure1.split(':'))
         heure2_heures, heure2_minutes = map(int, heure2.split(':'))
         
@@ -52,8 +75,16 @@ class Agenda_data:
         
         return difference_minutes
 
-
     def _calculer_heure_fin(self, heure_debut, duree_minutes):
+        """
+        Calcule l'heure de fin en ajoutant une durée en minutes à une heure de début.
+        Args:
+            heure_debut (str): L'heure de début au format 'HH:MM'.
+            duree_minutes (int): La durée en minutes à ajouter.
+
+        Returns:
+            str: L'heure de fin au format 'HH:MM'.
+        """
         heures_debut, minutes_debut = map(int, heure_debut.split(':'))
         
         total_minutes_debut = heures_debut * 60 + minutes_debut
@@ -67,17 +98,40 @@ class Agenda_data:
         return heure_fin
 
     def _comparer_temps_debut(self, event):
+        """
+        Fonction de comparaison pour trier les événements par heure de début.
+        Args:
+            event (dict): Un événement avec une clé 'start_time'.
+
+        Returns:
+            str: L'heure de début de l'événement.
+        """
         return event['start_time']
 
+    def _init_slot(self, start, stop):
+        """
+        Initialise un créneau horaire avec l'heure de début, l'heure de fin et la durée en minutes.
+        Args:
+            start (str): L'heure de début au format 'HH:MM'.
+            stop (str): L'heure de fin au format 'HH:MM'.
 
-    def _init_slot(self,start,stop):
+        Returns:
+            dict: Un dictionnaire représentant le créneau horaire.
+        """
         slot_time = self._difference(start, stop)
-        res = {'start':start, 'end':stop, 'time':slot_time}
+        res = {'start': start, 'end': stop, 'time': slot_time}
         return res
 
-
-
     def _get_creneaux_libre_by_day(self, events, delta_minute):
+        """
+        Récupère les créneaux libres pour une journée donnée en fonction des événements existants et d'un intervalle minimal.
+        Args:
+            events (list): Liste des événements pour la journée.
+            delta_minute (int): Durée minimale d'un créneau libre en minutes.
+
+        Returns:
+            list: Une liste de créneaux libres pour la journée.
+        """
         events.append({'summary': 'pause repas', 'start_time': '12:00', 'end_time': '14:00','completed':False})
         events_triees = sorted(events, key=self._comparer_temps_debut, reverse=False)
         begin = '8:00'
@@ -97,15 +151,23 @@ class Agenda_data:
                 if self._difference(fin1, debut2) >= delta_minute:
                     free_slots.append(self._init_slot(fin1, debut2))
             
-            
             if self._difference(dernier_event['end_time'], end) >= delta_minute:
                 free_slots.append(self._init_slot(dernier_event['end_time'], end))
         else:
-            free_slots = [{'start':begin, 'end':end}]
+            free_slots = [{'start': begin, 'end': end}]
 
         return free_slots
 
     def _is_enough_time(self, objectifs, temp_libre):
+        """
+        Vérifie s'il y a suffisamment de temps libre pour accomplir tous les objectifs.
+        Args:
+            objectifs (list): Liste des objectifs avec leurs deadlines et temps nécessaires.
+            temp_libre (list): Liste des créneaux libres jusqu'à la dernière deadline.
+
+        Returns:
+            bool: True s'il y a suffisamment de temps libre, sinon False.
+        """
         objectifs_triee = sorted(objectifs, key=lambda x: datetime.strptime(x['deadline'], '%d/%m/%Y'))
         somme_time_objectifs = 0
         for objectif in objectifs_triee:
@@ -118,8 +180,16 @@ class Agenda_data:
             somme_time_objectifs += time_objectif
         return True
 
+    def _get_total_time_creneaux_libre_until_deadline(self, days, date_str):
+        """
+        Calcule le temps total disponible dans les créneaux libres jusqu'à une date limite.
+        Args:
+            days (list): Liste des jours avec leurs créneaux libres.
+            date_str (str): La date limite au format 'JJ/MM/AAAA'.
 
-    def _get_total_time_creneaux_libre_until_deadline(self,days, date_str):
+        Returns:
+            int: Le temps total disponible en minutes jusqu'à la date limite.
+        """
         total_time = 0
         date_actuelle = datetime.now()
         date_obj = datetime.strptime(date_str, "%d/%m/%Y") 
@@ -134,10 +204,27 @@ class Agenda_data:
         
         return total_time
 
-    def _extraire_date_deadline(self,event):
+    def _extraire_date_deadline(self, event):
+        """
+        Extrait la date de la deadline d'un événement.
+        Args:
+            event (dict): Un événement avec une clé 'deadline'.
+
+        Returns:
+            datetime: La date de la deadline.
+        """
         return datetime.strptime(event['deadline'], "%d/%m/%Y")
 
-    def _get_temp_libre_until_last_goal(self,liste_events, list_cours):
+    def _get_temp_libre_until_last_goal(self, liste_events, list_cours):
+        """
+        Récupère les créneaux libres jusqu'à la dernière deadline des objectifs.
+        Args:
+            liste_events (list): Liste des objectifs avec leurs deadlines et temps nécessaires.
+            list_cours (dict): Dictionnaire des cours par date.
+
+        Returns:
+            list: Une liste de créneaux libres pour chaque jour jusqu'à la dernière deadline.
+        """
         liste_events_triee = sorted(liste_events, key=self._extraire_date_deadline)
 
         # Date actuelle
@@ -156,9 +243,15 @@ class Agenda_data:
             liste_dates.append([date_actuelle_string, temps_libre_by_date])
             date_actuelle += timedelta(days=1)  # Incrémentation d'un jour
         return liste_dates
-        # Affichage de la liste des dates générées
 
-    def _create_new_creneaux(self,temp_libre, list_cours, liste_objectifs):
+    def _create_new_creneaux(self, temp_libre, list_cours, liste_objectifs):
+        """
+        Crée de nouveaux créneaux dans l'agenda pour accomplir les objectifs.
+        Args:
+            temp_libre (list): Liste des créneaux libres.
+            list_cours (dict): Dictionnaire des cours par date.
+            liste_objectifs (list): Liste des objectifs avec leurs deadlines et temps nécessaires.
+        """
         day_index = 0
         for event in liste_objectifs:
             temps_event = event['temps'] * 60
@@ -189,9 +282,17 @@ class Agenda_data:
                 if temps_event > 0:
                     day_index += 1  # Passer au jour suivant si tous les créneaux pour le jour actuel ont été explorés
                     creneau_index = 0  # Réinitialiser creneau_index pour le nouveau jour
-                
 
     def get_creneaux_supllémentaire(self, liste_objectifs, list_cours):
+        """
+        Récupère les créneaux supplémentaires nécessaires pour accomplir les objectifs.
+        Args:
+            liste_objectifs (list): Liste des objectifs avec leurs deadlines et temps nécessaires.
+            list_cours (dict): Dictionnaire des cours par date.
+
+        Returns:
+            dict: Dictionnaire des cours mis à jour avec les nouveaux créneaux, ou -1 s'il n'y a pas assez de temps.
+        """
         temp_libre = self._get_temp_libre_until_last_goal(liste_objectifs, list_cours)
         if self._is_enough_time(liste_objectifs, temp_libre):
             self._create_new_creneaux(temp_libre, list_cours, liste_objectifs)
@@ -199,11 +300,18 @@ class Agenda_data:
         else:
             return -1
 
+    def get_events_for_next_x_day(self, x):
+        """
+        Récupère les événements pour les x prochains jours.
+        Args:
+            x (int): Le nombre de jours à récupérer.
 
-    def get_events_for_next_x_day(self,x):
+        Returns:
+            dict: Un dictionnaire contenant les événements pour chaque jour.
+        """
         events = {}
 
-        for i in range(x+1):
+        for i in range(x + 1):
             futur_time = datetime.now() + timedelta(days=i)
             futur_time_date = futur_time.date()
             event = self._get_events_for_date_searched(futur_time_date)
@@ -213,22 +321,3 @@ class Agenda_data:
                 events[str(futur_time_date)].append(event)
         return events
     
-    def add_event(self, date, event):
-        pass
-
-# Lien vers le fichier ICS
-
-"""
-ics_url = "https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18"
-
-agenda = Agenda_data(ics_url)
-cours = agenda.get_events_for_next_x_day(20)
-
-
-liste_objectifs = [
-    {"name":"IE meca", "deadline":"23/04/2024", "temps":6},
-    {"name":"IE math", "deadline":"21/04/2024", "temps":6}
-]
-new_agenda = agenda.get_creneaux_supllémentaire(liste_objectifs, cours)
-
-"""
