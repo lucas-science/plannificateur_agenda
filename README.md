@@ -3,7 +3,7 @@
 
 Commencez par décompresser le dossier du projet.
 
-Pour installer le(s) bibliothèque(s) nécessaire(s), veuillez utiliser la commande suivante : 
+Pour installer le(s) bibliothèque(s) nécessaire(s), veuillez utiliser la commande suivante dans le dossier décompressé : 
 ```sh
 pip install -r requirements.txt
 ```
