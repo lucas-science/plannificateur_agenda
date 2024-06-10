@@ -9,13 +9,14 @@ pip install ics
 pip install iclendar
 ```
 
-Enfin lancer le projet en éxecutant le fichier : 'interface.py'
+Enfin lancez le projet en éxecutant le fichier : 'interface.py'
 
 Afin de tester l'application, nous vons proposons d'utiliser le lien d'emplois du temps suivant : 
 
 ```
 https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18
 ```
+
 
 
 

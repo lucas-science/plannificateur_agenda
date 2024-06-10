@@ -191,7 +191,8 @@ class Agenda_data:
             int: Le temps total disponible en minutes jusqu'à la date limite.
         """
         total_time = 0
-        date_actuelle = datetime.now()
+        #date_actuelle = datetime.now()
+        date_actuelle = datetime(2024, 6, 3)
         date_obj = datetime.strptime(date_str, "%d/%m/%Y") 
         date_obj -= timedelta(days=1)
         date_string_formatted = date_obj.strftime("%Y-%m-%d")
@@ -228,7 +229,9 @@ class Agenda_data:
         liste_events_triee = sorted(liste_events, key=self._extraire_date_deadline)
 
         # Date actuelle
-        date_actuelle = datetime.now().date()
+        #date_actuelle = datetime.now().date()
+        date_actuelle = datetime(2024, 6, 3).date()
+
         date_last_deadline = liste_events_triee[-1]['deadline']
         # Date jusqu'à laquelle vous voulez générer la liste
         date_fin = datetime.strptime(date_last_deadline, '%d/%m/%Y').date()
@@ -312,7 +315,8 @@ class Agenda_data:
         events = {}
 
         for i in range(x + 1):
-            futur_time = datetime.now() + timedelta(days=i)
+            #futur_time = datetime.now() + timedelta(days=i)
+            futur_time = datetime(2024, 6, 3) + timedelta(days=i)
             futur_time_date = futur_time.date()
             event = self._get_events_for_date_searched(futur_time_date)
             if str(futur_time) not in events.keys():

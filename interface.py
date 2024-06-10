@@ -305,7 +305,10 @@ class App(tk.Tk):
         self.main_frame.configure(bg="#add8e6")
 
         global current_date
-        current_date = datetime.now().date()
+        current_date = datetime(2024, 6, 3).date() # pour bien voir les différentes fonctionnalité puisqu'on a plus cours.
+        #current_date = datetime.now().date()
+        print(current_date)
+        print(datetime(2024, 6, 3).date() )
         self.week_frame = tk.Frame(self.main_frame)
         self.week_frame.pack(pady=10)
 
