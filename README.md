@@ -17,6 +17,7 @@ Afin de tester l'application, nous vons proposons d'utiliser le lien d'emplois d
 https://ade-outils.insa-lyon.fr/ADE-Cal:~llhomme!2023-2024:a5c217dab6bd6040d9f1cf0f3285b7242f936f18
 ```
 
+De plus, dans la mesure où le test réalisé par les professeurs se fera durant une période où les étudiants n'ont plus cours, alors on a modifié le code pour que la "date actuelle" soit le 03/06/2024. Ainsi ces derniers auront accès à un agenda plus fourni où l'on peut constater le concept non trivial de notre algorithme.
 
 
 
