@@ -3,7 +3,7 @@
 
 Commencez par décompresser le dossier du projet.
 
-Pour installer le(s) bibliothèque(s) nécessaire(s), veuillez utiliser la commande iuivante dans spyder5 :
+Pour installer le(s) bibliothèque(s) nécessaire(s), veuillez utiliser la commande suivante dans spyder5 :
 ```sh
 pip install ics
 pip install icalendar
